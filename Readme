@@ -1,1 +1,3 @@
 The Simplified Puzzle Planning Competition System (SPPCS) project is a network based project that compares the performance of different client-based planning systems in solving PDDL puzzles.
+
+We need a client and a server. The client can create a game, start a created game, and join a game. The server can add a new game type and manage the 
