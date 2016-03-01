@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Feb 28, 2016 11:10:26 AM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="spms.server.model.GameType" table="GameType" catalog="gamesdb">
+        <id name="gameId" type="java.lang.Integer">
+            <column name="gameId" />
+            <generator class="identity" />
+        </id>
+        <property name="gameName" type="string">
+            <column name="gameName" not-null="true" />
+        </property>
+        <property name="gameDesc" type="string">
+            <column name="gameDesc" length="400" />
+        </property>
+        <property name="domainFile" type="string">
+            <column name="domainFile" not-null="true" />
+        </property>
+        <property name="generatorCmd" type="string">
+            <column name="generatorCmd" not-null="true" />
+        </property>
+        <property name="gameLavel" type="int">
+            <column name="gameLavel" not-null="true" />
+        </property>
+        <set name="activeGameses" table="ActiveGames" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="game_id" not-null="true" />
+            </key>
+            <one-to-many class="spms.server.model.ActiveGames" />
+        </set>
+    </class>
+</hibernate-mapping>

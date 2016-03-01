@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Feb 28, 2016 11:10:26 AM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="spms.server.model.Connections" table="Connections" catalog="gamesdb">
+        <id name="sessionId" type="int">
+            <column name="sessionId" />
+            <generator class="assigned" />
+        </id>
+        <many-to-one name="activeGames" class="spms.server.model.ActiveGames" fetch="select">
+            <column name="gameId" not-null="true" />
+        </many-to-one>
+        <property name="clientIp" type="string">
+            <column name="clientIP" not-null="true" />
+        </property>
+        <property name="connectTime" type="timestamp">
+            <column name="connectTime" length="19" not-null="true" />
+        </property>
+        <property name="status" type="string">
+            <column name="status" length="45" />
+        </property>
+    </class>
+</hibernate-mapping>
