@@ -26,6 +26,10 @@ public class ActiveGame {
     
     TCPClient session;  //Through this Object we can reach communication between the Server and Client and call Method send and receive data to and from the server
     GameType game;  //This Object contains the game that chosen by client
+
+    public ActiveGame(TCPClient session) {
+        this.session = session;
+    }
     
     
     public void joinToGame(){  //this method sends game data that chosen by client to join it
@@ -71,30 +75,39 @@ public class ActiveGame {
         
     }
     
-    public void receiveGames(){  //Through this method client can receive game that join it
+    public List<GameType> receiveGames(){  //Through this method client can receive game that join it
         List<GameType> games=new ArrayList<GameType>();
         
         session.send(SysConst.GET_ACTIVE_GAMES);
         String data = session.receive();
+        
+        if(data.startsWith(SysConst.NO_DATA))
+            return games;
         JSONParser parser = new JSONParser();
         try {
             Object obj = parser.parse(data);
             JSONArray array = (JSONArray) obj;
             Iterator ait = array.iterator();
-            games = new ArrayList<GameType>();
+           
             while (ait.hasNext()) {
-                GameType g = (GameType) ait.next();
+               
+                JSONObject jo= (JSONObject) ait.next();
+                GameType g = new GameType();
+                g.setGameId(Integer.parseInt(jo.get("gameId").toString()));
+               g.setGameName(jo.get("gameName").toString());
+               g.setGameDesc(jo.get("gameDesc")+"");
+               g.setGameLavel(Integer.parseInt(jo.get("gameLavel").toString()));
+               
                 games.add(g);
 
             }
             
-            // TODO: show on UI List
-            
+        
 
         } catch (ParseException pe) {
             pe.printStackTrace();
         }
-        
+        return games;
         
     }
     

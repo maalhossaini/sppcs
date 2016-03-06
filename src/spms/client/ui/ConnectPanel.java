@@ -9,7 +9,13 @@ package spms.client.ui;
 
 import java.awt.BorderLayout;
 import java.awt.LayoutManager;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import spms.client.TCPClient;
 
 /**
  *
@@ -118,10 +124,14 @@ public class ConnectPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        
-        
-      ClientFrame.frame.viewHomePanel();
+        try {
+            Socket server=new Socket(jTextField1.getText(),Integer.parseInt(jTextField2.getText()));
+            ClientFrame.tcp=new TCPClient(server);
+            ClientFrame.frame.viewHomePanel();
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
      
       
         

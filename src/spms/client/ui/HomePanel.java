@@ -6,17 +6,54 @@
 
 package spms.client.ui;
 
+import java.util.Iterator;
+import java.util.List;
+import spms.client.ActiveGame;
+import spms.client.CreateGame;
+import spms.client.GameType;
+
 /**
  *
  * @author yazeedalmusharraf
  */
 public class HomePanel extends javax.swing.JPanel {
-
+    CreateGame creator;
+    ActiveGame active;
     /**
      * Creates new form HomePanel
      */
+    public void getGameLists(){
+       
+        
+     List<GameType> list= creator.receiveGames();
+                  
+   //List<GameType> list= active.receiveGames();
+     Object[] data1=new Object[list.size()];
+     Iterator<GameType> i=list.iterator();
+     int index=0;
+     while(i.hasNext()){
+         data1[index]=i.next().getGameName();
+         index++;
+     }
+     jList1.setListData(data1);
+     
+     //list= creator.receiveGames();
+     list=active.receiveGames();
+     Object[] data2=new Object[list.size()];
+     i=list.iterator();
+     index=0;
+     while(i.hasNext()){
+         data2[index]=i.next().getGameName();
+         index++;
+     }
+     jList2.setListData(data2);
+    
+    }
     public HomePanel() {
+        creator=new CreateGame(ClientFrame.tcp);
+        active=new ActiveGame(ClientFrame.tcp);
         initComponents();
+        getGameLists();
     }
 
     /**
@@ -93,7 +130,7 @@ public class HomePanel extends javax.swing.JPanel {
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
                     .addComponent(jScrollPane1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

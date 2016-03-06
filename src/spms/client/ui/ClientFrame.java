@@ -9,6 +9,7 @@ package spms.client.ui;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import spms.client.TCPClient;
 
 /**
  *
@@ -17,6 +18,7 @@ import javax.swing.JTabbedPane;
 public class ClientFrame extends javax.swing.JFrame {
     public static ClientFrame frame;
     public static JTabbedPane tabPanel;
+    public static TCPClient tcp;
     public void viewConnectPanel() {
         JPanel connPanel = new ConnectPanel();
         tabPanel.removeAll();
@@ -28,8 +30,10 @@ public class ClientFrame extends javax.swing.JFrame {
 public void viewHomePanel(){  
     
         JPanel homePanel = new HomePanel();
+        
         tabPanel.removeAll();
         tabPanel.addTab("Home", homePanel);
+        
         
         //pack();
         this.setVisible(true);
@@ -87,6 +91,11 @@ public void viewWaitingPanel(){
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -101,6 +110,12 @@ public void viewWaitingPanel(){
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        if(tcp!=null)
+        tcp.close();
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments

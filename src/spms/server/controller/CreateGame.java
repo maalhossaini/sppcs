@@ -71,6 +71,7 @@ public class CreateGame {
         String jsonText = out.toString();
         
         session.send(jsonText);
+       // System.out.println(jsonText);
         
         
         } catch (IOException ex) {

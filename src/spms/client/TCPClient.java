@@ -29,11 +29,7 @@ public class TCPClient {
 
     public TCPClient(Socket server) {
         this.server = server;
-        try {
-            mcast = new MulticastSocket(7501);
-        } catch (IOException ex) {
-            Logger.getLogger(TCPClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
+       this.send("ok");
     }
 
     public void run() {  //This method responsible for creating thread whene server accept connecttion to client so that it can receive data at any time from the server
@@ -43,12 +39,14 @@ public class TCPClient {
     }
 
     public void send(Object data) {  //Through this method client can send data to server
+        System.out.println("SEND: "+data.toString());
         try {
-            byte[] buff = data.toString().getBytes();
+            byte[] buff = (data.toString()+"\n").getBytes();
             DataOutputStream outToServer = new DataOutputStream(server.getOutputStream());
             outToServer.write(buff, 0, buff.length);
-            outToServer.flush();
-            //outToServer.close();
+           // outToServer.flush();
+            
+           // outToServer.
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -61,11 +59,13 @@ public class TCPClient {
         try {
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(server.getInputStream()));
 
-            if (inFromServer.ready()) {
-                buff = inFromServer.readLine();
-
-            }
-
+     //      while (!inFromServer.ready()) {
+               
+     //          System.out.println("looop");
+     //      }
+            
+       buff = inFromServer.readLine();
+            System.out.println("RECEIVED: "+buff);
         } catch (IOException ex) {
             ex.printStackTrace();
 
@@ -73,6 +73,17 @@ public class TCPClient {
         }
 
         return buff;
+    }
+    public void close(){
+        try {
+            
+            if(server.isConnected()){
+                send(SysConst.CLOSE_CONNECTION);
+                server.close();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(TCPClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public String receiveMuiltCast(String ipGroup) {  //Through this method client can receive multiCast from server

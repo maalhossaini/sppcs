@@ -81,7 +81,7 @@ public class ActiveGame {
         
         Session dbconn=HibernateUtil.getSessionFactory().openSession();
         dbconn.beginTransaction();
-        Query q=dbconn.createQuery("Select g from  ActiveGames a,GameType g where a.gameType.gameId=g.gameId").setParameter("state", SysConst.CONNECTION_STATUS_WAITING);
+        Query q=dbconn.createQuery("Select g from  ActiveGames a,GameType g where a.gameType.gameId=g.gameId");
         List<GameType> games=q.list();
         dbconn.close();
         
@@ -105,8 +105,11 @@ public class ActiveGame {
         list.writeJSONString(out);
         
         String jsonText = out.toString();
-        
-        session.send(jsonText);
+        if(games.size()>0)
+                session.send(jsonText);
+        else{
+              session.send(SysConst.NO_DATA);
+        }
         
         
         } catch (IOException ex) {

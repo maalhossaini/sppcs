@@ -27,6 +27,10 @@ public class CreateGame {
     GameType game;  //This Object contains the Games that Client wants to established and will be sent to the server (ie, the game will be sent a gameId and through which the server can access the values of properties Object)
     List<GameType> games;  //This attribute contains a set of object of type Games which contain game data that can  Client created on the server
 
+    public CreateGame(TCPClient session) {
+        this.session = session;
+    }
+
     public void sendGame() {  //Through this method it's called Method send which in class TCPClient and it's send the game data that chosen by client
         
         
@@ -65,10 +69,12 @@ public class CreateGame {
         
     }
 
-    public void receiveGames() {  //Through this method it's called Method Receive which in calss TCPClient and it's receive the games data that can client select it
+    public List<GameType> receiveGames() {  //Through this method it's called Method Receive which in calss TCPClient and it's receive the games data that can client select it
 
         session.send(SysConst.GET_GAMES_TYPE);
+        
         String data = session.receive();
+      
         JSONParser parser = new JSONParser();
         try {
             Object obj = parser.parse(data);
@@ -76,18 +82,23 @@ public class CreateGame {
             Iterator ait = array.iterator();
             games = new ArrayList<GameType>();
             while (ait.hasNext()) {
-                GameType g = (GameType) ait.next();
+                
+                JSONObject jo= (JSONObject) ait.next();
+                GameType g = new GameType();
+                g.setGameId(Integer.parseInt(jo.get("gameId").toString()));
+               g.setGameName(jo.get("gameName").toString());
+               g.setGameDesc(jo.get("gameDesc")+"");
+               g.setGameLavel(Integer.parseInt(jo.get("gameLavel").toString()));
                 games.add(g);
 
             }
-            
-            // TODO: show on UI List
-            
+          
+        
 
         } catch (ParseException pe) {
             pe.printStackTrace();
         }
-
+        return games;
     }
 
     public void createGame() {  //Through this method it receive game that want to be created on the server by client
