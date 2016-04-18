@@ -1,5 +1,5 @@
 package spms.server.model;
-// Generated Feb 28, 2016 11:10:24 AM by Hibernate Tools 3.6.0
+// Generated Apr 11, 2016 12:21:00 AM by Hibernate Tools 3.6.0
 
 
 import java.util.Date;
@@ -17,15 +17,11 @@ public class FinishGamesId  implements java.io.Serializable {
     public FinishGamesId() {
     }
 
-    public FinishGamesId(Integer gameId, String playerIp, Date time) {
+    public FinishGamesId(int gameId, String playerIp, Date time) {
        this.gameId = gameId;
        this.playerIp = playerIp;
        this.time = time;
     }
-
-  
-
-
    
     public int getGameId() {
         return this.gameId;

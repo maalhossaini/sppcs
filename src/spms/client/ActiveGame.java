@@ -6,6 +6,8 @@
 
 package spms.client;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -26,16 +28,16 @@ public class ActiveGame {
     
     TCPClient session;  //Through this Object we can reach communication between the Server and Client and call Method send and receive data to and from the server
     GameType game;  //This Object contains the game that chosen by client
-
+    List<GameType> games;  
+    String domainfile;
     public ActiveGame(TCPClient session) {
         this.session = session;
     }
     
     
-    public void joinToGame(){  //this method sends game data that chosen by client to join it
+    public void joinToGame(int g){  //this method sends game data that chosen by client to join it
         
-        //TODO: get selected game from UI & set to game
-        
+       game=games.get(g);
         try {
 
         JSONObject obj = new JSONObject();
@@ -54,15 +56,30 @@ public class ActiveGame {
         
         setConnection();
         
-        //TODO: move client to waiting screen UI
+        
         
         String data="";
         data=session.receive();
         
+             if(data.startsWith(SysConst.DOMAIN_FILE)){
+            data=data.substring(4);
+            data=data.replace(SysConst.ENDL,"\n");
+            domainfile=data;
+            new File(game.getGameName()).mkdirs();
+            try {
+                FileOutputStream f = new FileOutputStream(game.getGameName()+"/domain.pddl");
+                f.write(data.getBytes());
+                f.close();
+            }catch(IOException ex){
+                System.err.println(ex.getMessage());
+            }
+            //System.out.println(data);
+        }
+        
+        
         // TODO: write generator file on storage
         
-        Solver game_solver=new Solver(session,game);
-        game_solver.executePDDL();
+     
         
         
         
@@ -76,7 +93,7 @@ public class ActiveGame {
     }
     
     public List<GameType> receiveGames(){  //Through this method client can receive game that join it
-        List<GameType> games=new ArrayList<GameType>();
+         games=new ArrayList<GameType>();
         
         session.send(SysConst.GET_ACTIVE_GAMES);
         String data = session.receive();
@@ -113,9 +130,25 @@ public class ActiveGame {
     
     public void setConnection(){  //This method send the connection status between server and client to server (the case will be sent to the server that client has done join on one of the game and start solve the game)
         
-        session.send(SysConst.CONNECTION_STATUS_JOIN);
+     //   session.send(SysConst.CONNECTION_STATUS_JOIN);
         
         
+    }
+
+    public String getDomainfile() {
+        return domainfile;
+    }
+
+    public void setDomainfile(String domainfile) {
+        this.domainfile = domainfile;
+    }
+
+    public GameType getGame() {
+        return game;
+    }
+
+    public void setGame(GameType game) {
+        this.game = game;
     }
     
     

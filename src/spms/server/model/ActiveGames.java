@@ -1,5 +1,5 @@
 package spms.server.model;
-// Generated Feb 28, 2016 11:10:24 AM by Hibernate Tools 3.6.0
+// Generated Apr 11, 2016 12:21:00 AM by Hibernate Tools 3.6.0
 
 
 import java.util.Date;

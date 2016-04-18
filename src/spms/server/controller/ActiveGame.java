@@ -1,7 +1,10 @@
 package spms.server.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +19,7 @@ import org.json.simple.parser.ParseException;
 
 import spms.common.HibernateUtil;
 import spms.server.model.ActiveGames;
+import spms.server.model.Connections;
 import spms.server.model.FinishGames;
 import spms.server.model.FinishGamesId;
 import spms.server.model.GameType;
@@ -52,7 +56,7 @@ public class ActiveGame {
         Object obj = parser.parse(data);
         
         JSONObject jobj = (JSONObject) obj;
-        Integer gameId= (Integer)jobj.get("gameId");
+        Integer gameId= Integer.parseInt(jobj.get("gameId").toString());
         
         
         Session dbconn=HibernateUtil.getSessionFactory().openSession();
@@ -60,13 +64,41 @@ public class ActiveGame {
         Query q=dbconn.createQuery("Select g from ActiveGames g where g.activeGameId=:id").setParameter("id",gameId);
         ActiveGames ags= (ActiveGames) q.uniqueResult();
         dbconn.close();
-                
-                
-                
+           
+        
+        dbconn=HibernateUtil.getSessionFactory().openSession();
+        dbconn.beginTransaction();
+        q=dbconn.createQuery("Select t from ActiveGames g,GameType t where g.activeGameId=:id and t.gameId=g.gameType.gameId").setParameter("id",gameId);
+        System.out.println(q.getQueryString());
+        GameType gt= (GameType) q.uniqueResult();
+        dbconn.close();
+        
+        
+               
+             Connections gameCon=new Connections();
+             
+             gameCon.setClientIp(session.server.getRemoteSocketAddress().toString());
+             gameCon.setActiveGames(ags);
+             gameCon.setSessionId(session.conn_index);
+             gameCon.setConnectTime(new Date());
+             gameCon.setStatus(SysConst.CONNECTION_STATUS_WAITING);
+             
+             
+             dbconn=HibernateUtil.getSessionFactory().openSession();
+             dbconn.beginTransaction().begin();
+               dbconn.save(gameCon);
+               dbconn.beginTransaction().commit();
+             dbconn.close();  
+             
+        String dom = new String(Files.readAllBytes((new File(gt.getDomainFile()).toPath())));
+        dom=dom.replace("\n",SysConst.ENDL);
+        session.send(SysConst.DOMAIN_FILE+dom);     
                 
         
         
         } catch (ParseException ex) {
+            Logger.getLogger(ActiveGame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(ActiveGame.class.getName()).log(Level.SEVERE, null, ex);
         }
         
@@ -81,7 +113,9 @@ public class ActiveGame {
         
         Session dbconn=HibernateUtil.getSessionFactory().openSession();
         dbconn.beginTransaction();
-        Query q=dbconn.createQuery("Select g from  ActiveGames a,GameType g where a.gameType.gameId=g.gameId");
+        Query q=dbconn.createQuery("Select g from  ActiveGames a,GameType g where a.gameType.gameId=g.gameId order by a.createdTime");
+        Query q2=dbconn.createQuery("Select a from  ActiveGames a,GameType g where a.gameType.gameId=g.gameId order by a.createdTime");
+        List<ActiveGames> agames=q2.list();
         List<GameType> games=q.list();
         dbconn.close();
         
@@ -90,10 +124,12 @@ public class ActiveGame {
         
         JSONArray list=new JSONArray();
         Iterator<GameType> gi=games.iterator();
+        Iterator<ActiveGames> ai=agames.iterator();
         while(gi.hasNext()){
             GameType g=gi.next();
+            ActiveGames a=ai.next();
             JSONObject obj = new JSONObject();
-            obj.put("gameId",g.getGameId());
+            obj.put("gameId",a.getActiveGameId());
             obj.put("gameDesc",g.getGameDesc());
             obj.put("gameName",g.getGameName());
             obj.put("gameLavel",g.getGameLavel());
@@ -128,20 +164,67 @@ public class ActiveGame {
     public void FinishedGame(String data){
         
         // TODO:: convert data result to integer score
+        int score=0;
+         data=data.replace(SysConst.ENDL,"\n");
         
-           int score=0;
+   
         
-            FinishGames fg=new FinishGames();
-            
-            fg.setId(new FinishGamesId(game.getGameId(),session.server.getRemoteSocketAddress().toString(),new Date()));
-            fg.setScore(score);
- 
         
-             Session dbconn=HibernateUtil.getSessionFactory().openSession();
+              Session dbconn = HibernateUtil.getSessionFactory().openSession();
+                    dbconn.beginTransaction();
+                    Query q = dbconn.createQuery("Select f from FinishGames f where f.sessionId=:sid and f.id.playerIp=:ip")
+                            .setParameter("sid", session.conn_index).setParameter("ip",session.server.getRemoteSocketAddress().toString());
+                    List<FinishGames> fgames = q.list();
+                    dbconn.close();
+                    if(fgames.size()>0)
+                    {
+                    FinishGames fg=fgames.get(0);
+                    
+                       
+            String path="/var/spms/solve/"+(fg.getSessionId())+(fg.getId().getGameId())+"solve.pddl";
+           
+            try {
+                FileOutputStream f = new FileOutputStream(path);
+                f.write(data.getBytes());
+                f.close();
+                
+                fg.setResult(path);
+                
+                
+                String solveTime=(data.trim().substring(data.trim().lastIndexOf("\n"),data.trim().indexOf("seconds total time"))).trim();
+                String numSteps=(data.trim().substring(data.trim().indexOf("step"),data.trim().indexOf("time spent:"))).trim();
+                numSteps=(numSteps.substring(numSteps.trim().lastIndexOf("\n"),numSteps.trim().lastIndexOf(":"))).trim();
+                
+                //System.out.println(numSteps);
+                
+                fg.setSecondsTime(Double.parseDouble(solveTime));
+                fg.setScore(Integer.parseInt(numSteps));
+                
+            }catch(Exception ex){
+                System.err.println(ex.getMessage());
+            }
+                    
+                    
+                    
+                        
+                        
+                            dbconn=HibernateUtil.getSessionFactory().openSession();
              dbconn.beginTransaction().begin();
-               dbconn.save(fg);
+               dbconn.saveOrUpdate(fg);
                dbconn.beginTransaction().commit();
              dbconn.close();
+                    }
+                    
+        
+          
+     
+           
+ 
+        
+          
+                
+             
+             // TODO:: call to VAL
     
     }
 

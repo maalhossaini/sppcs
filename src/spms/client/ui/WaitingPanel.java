@@ -8,42 +8,90 @@ package spms.client.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.Timer;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TimerTask;
+import java.util.Timer;
+import spms.client.ActiveGame;
+import spms.client.CreateGame;
+import spms.client.GameType;
+import spms.client.SysConst;
 
 /**
  *
  * @author yazeedalmusharraf
  */
 public class WaitingPanel extends javax.swing.JPanel {
-        int intrv=0;
+      
         Timer timer;
+        static CreateGame creator;
+        static ActiveGame active;
+        
     /**
      * Creates new form WaitingPanel
      */
-    public WaitingPanel() {
+     public void setDomainFile(String domain){
+         jTextArea1.setText(domain);
+     
+     }
+     public WaitingPanel(ActiveGame active) {
+         this.active=active;
+         initWaitingPanel();
+         
+     }
+     
+    public WaitingPanel(CreateGame creator) {
+        this.creator=creator;
+           initWaitingPanel();
+    
+    }
+    
+     public void initWaitingPanel() {
         initComponents();
-
-        ActionListener action = new ActionListener()
-        {   
-            @Override
-            public void actionPerformed(ActionEvent event)
-            {
-                    if(intrv<5){
-                        intrv++;
-                        jLabel1.setText(jLabel1.getText()+".");
-                                
-                    }
-                else{
-                        timer.stop();
-                        
-                    }
+        
+         timer = new Timer();
+        
+        timer.scheduleAtFixedRate(new TimerTask() {
+          @Override
+          public void run() {
+            
+              
+            String data=ClientFrame.tcp.receive();
+            if(data.startsWith(SysConst.START_GAME)){
+                timer.cancel();
+                data=data.substring(4);
+                data=data.replace(SysConst.ENDL,"\n");
+                GameType game=null;
+                if(WaitingPanel.creator!=null)
+                    game=WaitingPanel.creator.getGame();
+                
+                if(WaitingPanel.active!=null)
+                    game=WaitingPanel.active.getGame();
+                
+                
+            try {
+                FileOutputStream f = new FileOutputStream(game.getGameName()+"/genfile.pddl");
+                f.write(data.getBytes());
+                f.close();
+                
+                
+            }catch(IOException ex){
+                System.err.println(ex.getMessage());
             }
-        };
-        
-        
-        timer = new Timer(1000, action);
-        timer.setInitialDelay(0);
-        timer.start();
+            
+            
+            
+                 ClientFrame.frame.viewStartPanel(game);
+            
+            }
+    
+
+      
+          }
+        }, 30000,30000);
     }
 
     /**
@@ -56,30 +104,64 @@ public class WaitingPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jButton1 = new javax.swing.JButton();
 
         jLabel1.setFont(new java.awt.Font("Lucida Grande", 1, 24)); // NOI18N
         jLabel1.setText("Waiting .");
+
+        jTextArea1.setEditable(false);
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jButton1.setText("< Back");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(jButton1)
+                .addContainerGap(518, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(142, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(127, 127, 127))
+                .addGap(229, 229, 229))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(128, 128, 128)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(142, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addGap(13, 13, 13))
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+       ClientFrame.tcp.send(SysConst.BACK_TO_HOME);
+        ClientFrame.frame.viewHomePanel();
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }

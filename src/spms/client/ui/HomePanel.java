@@ -6,8 +6,15 @@
 
 package spms.client.ui;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import spms.client.ActiveGame;
 import spms.client.CreateGame;
 import spms.client.GameType;
@@ -19,6 +26,7 @@ import spms.client.GameType;
 public class HomePanel extends javax.swing.JPanel {
     CreateGame creator;
     ActiveGame active;
+    Timer timer;
     /**
      * Creates new form HomePanel
      */
@@ -27,23 +35,25 @@ public class HomePanel extends javax.swing.JPanel {
         
      List<GameType> list= creator.receiveGames();
                   
-   //List<GameType> list= active.receiveGames();
+  // List<GameType> list= active.receiveGames();
      Object[] data1=new Object[list.size()];
      Iterator<GameType> i=list.iterator();
      int index=0;
      while(i.hasNext()){
-         data1[index]=i.next().getGameName();
+        GameType gt= i.next();
+         data1[index]=gt.getGameName()+" (Level "+gt.getGameLavel()+")";
          index++;
      }
      jList1.setListData(data1);
-     
+     System.out.println("##########################################3");
      //list= creator.receiveGames();
-     list=active.receiveGames();
+     list= active.receiveGames();
      Object[] data2=new Object[list.size()];
      i=list.iterator();
      index=0;
      while(i.hasNext()){
-         data2[index]=i.next().getGameName();
+         GameType g=i.next();
+         data2[index]=g.getGameName()+" (Level "+g.getGameLavel()+")";
          index++;
      }
      jList2.setListData(data2);
@@ -54,6 +64,32 @@ public class HomePanel extends javax.swing.JPanel {
         active=new ActiveGame(ClientFrame.tcp);
         initComponents();
         getGameLists();
+        System.out.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
+        
+         timer = new Timer();
+       
+        timer.scheduleAtFixedRate(new TimerTask() {
+          @Override
+          public void run() {
+            
+              
+             List<GameType>   list= active.receiveGames();
+             Object[] data2=new Object[list.size()];
+             Iterator<GameType> i=list.iterator();
+            int index=0;
+            while(i.hasNext()){
+                GameType g=i.next();
+                data2[index]=g.getGameName()+" (Level "+g.getGameLavel()+")";
+                index++;
+            }
+            jList2.setListData(data2);
+    
+
+      
+          }
+        }, 30000,30000);
+        
+        
     }
 
     /**
@@ -100,26 +136,32 @@ public class HomePanel extends javax.swing.JPanel {
         });
 
         jButton2.setText("join");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addGap(45, 45, 45)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(60, 60, 60)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 217, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 62, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton2)
-                            .addComponent(jLabel2))
-                        .addGap(0, 14, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(52, 52, 52))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -136,14 +178,36 @@ public class HomePanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        ClientFrame.frame.viewWaitingPanel();
+        if(jList1.getSelectedValue()!=null){
+        int g=jList1.getSelectedIndex();
+        creator.createGame(g);
+        timer.cancel();
+        ClientFrame.frame.viewWaitingPanel(creator);
+        }else{
+         JOptionPane.showMessageDialog(null, "Please Select Game !", "WARNING", JOptionPane.WARNING_MESSAGE);
+        
+        }
+        
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        if(jList2.getSelectedValue()!=null){
+        int g=jList2.getSelectedIndex();
+        active.joinToGame(g);
+        timer.cancel();
+        ClientFrame.frame.viewWaitingPanel(active);
+        }else{
+         JOptionPane.showMessageDialog(null, "Please Select Game !", "WARNING", JOptionPane.WARNING_MESSAGE);
+        
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

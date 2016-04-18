@@ -1,7 +1,13 @@
 package spms.server.controller;
 
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +21,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import spms.common.HibernateUtil;
 import spms.server.model.ActiveGames;
+import spms.server.model.Connections;
 import spms.server.model.GameType;
 
 /*
@@ -89,18 +96,26 @@ public class CreateGame {
                 Object obj = parser.parse(data);
 
                 JSONObject jobj = (JSONObject) obj;
-                Integer gameId= (Integer)jobj.get("gameId");
+                Integer gameId= Integer.parseInt(jobj.get("gameId").toString());
 
                 Session dbconn=HibernateUtil.getSessionFactory().openSession();
                 dbconn.beginTransaction();
                 Query q=dbconn.createQuery("Select g from GameType g where g.gameId=:id").setParameter("id",gameId);
                 game=(GameType) q.uniqueResult();
                 dbconn.close();
+        //System.out.println(game.getDomainFile());
         
+        
+        String dom = new String(Files.readAllBytes((new File(game.getDomainFile()).toPath())));
+        dom=dom.replace("\n",SysConst.ENDL);
+        session.send(SysConst.DOMAIN_FILE+dom);
+      
                 createGame();
         
         
         } catch (ParseException ex) {
+            Logger.getLogger(CreateGame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(CreateGame.class.getName()).log(Level.SEVERE, null, ex);
         }
         
@@ -109,15 +124,15 @@ public class CreateGame {
     
     public void createGame(){  //Through this method it create game on the server
         
-        String generatorFilePath="";
+      
         
-        //TODO:: call generator class
-        
+        Generator gen=new Generator(game);
+        String filepath=gen.executePDDL();
         
         ActiveGames ags=new ActiveGames();
         ags.setCreatedTime(new Date());
         ags.setGameType(game);
-        ags.setGeneratorFile(generatorFilePath);
+        ags.setGeneratorFile(filepath);
         
              Session dbconn=HibernateUtil.getSessionFactory().openSession();
              dbconn.beginTransaction().begin();
@@ -125,7 +140,23 @@ public class CreateGame {
                dbconn.beginTransaction().commit();
              dbconn.close();
              
-       // TODO:: run the Timer
+             
+             Connections gameCon=new Connections();
+             
+             gameCon.setClientIp(session.server.getRemoteSocketAddress().toString());
+             gameCon.setActiveGames(ags);
+             gameCon.setSessionId(session.conn_index);
+             gameCon.setConnectTime(new Date());
+             gameCon.setStatus(SysConst.CONNECTION_STATUS_WAITING);
+             
+             
+             dbconn=HibernateUtil.getSessionFactory().openSession();
+             dbconn.beginTransaction().begin();
+               dbconn.save(gameCon);
+               dbconn.beginTransaction().commit();
+             dbconn.close();     
+             
+             
         
         
     }

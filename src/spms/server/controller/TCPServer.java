@@ -21,10 +21,13 @@ public class TCPServer extends Thread{
     
  Socket server;
  static List<TCPServer> sessionList;
+ int conn_index;
  DatagramSocket mcast ;
 
     public TCPServer(Socket server) {
-        sessionList=new ArrayList<TCPServer>();
+        if(sessionList==null)
+            sessionList=new ArrayList<TCPServer>();
+        
         this.server = server;
      try {
          mcast=new DatagramSocket();
@@ -35,13 +38,14 @@ public class TCPServer extends Thread{
     
  @Override
     public void run(){
-          System.out.println(this.receive());
+         // System.out.println(this.receive());
         
-             CreateGame creator=new CreateGame(this);
-             ActiveGame active=new ActiveGame(this);
+             conn_index=sessionList.size();
              sessionList.add(this);
-               active.sendGames();
-             creator.sendGames();
+             
+              this.receive();
+             //creator.sendGames();
+             // active.sendGames();
            
              
     
@@ -74,10 +78,11 @@ public class TCPServer extends Thread{
                 
                buff= inFromClient.readLine();
               System.out.println("RECEIVED: "+buff);
-              break;
+              SysConst.parser(buff,this);
+             // break;
             
             }
-              Thread.sleep(1000);
+              Thread.sleep(100);
          }
          
          
@@ -91,6 +96,15 @@ public class TCPServer extends Thread{
     
     
     return buff;
+    }
+    public void close(){
+     try {
+         server.close();
+         
+     } catch (IOException ex) {
+         Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
+     }
+        
     }
   public void sendMuiltCast(Object data,String ipGroup){
   

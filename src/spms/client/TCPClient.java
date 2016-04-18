@@ -29,7 +29,7 @@ public class TCPClient {
 
     public TCPClient(Socket server) {
         this.server = server;
-       this.send("ok");
+       //this.send("ok");
     }
 
     public void run() {  //This method responsible for creating thread whene server accept connecttion to client so that it can receive data at any time from the server
@@ -71,7 +71,7 @@ public class TCPClient {
 
             //Logger.getLogger(TCPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        //System.out.println("RECEIVED: "+buff);
         return buff;
     }
     public void close(){

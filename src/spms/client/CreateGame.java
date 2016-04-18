@@ -5,6 +5,8 @@
  */
 package spms.client;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class CreateGame {
     TCPClient session;  //Through this Object we can reach communication between the server and Client and call Method send and receive data to and from the server
     GameType game;  //This Object contains the Games that Client wants to established and will be sent to the server (ie, the game will be sent a gameId and through which the server can access the values of properties Object)
     List<GameType> games;  //This attribute contains a set of object of type Games which contain game data that can  Client created on the server
-
+    String domainfile;
     public CreateGame(TCPClient session) {
         this.session = session;
     }
@@ -49,17 +51,32 @@ public class CreateGame {
         
         session.send(SysConst.SEND_CREATED_GAME+jsonText);
 
-        setConnection();
+        //setConnection();
         
-        //TODO: move client to waiting screen UI
+        
+        
         
         String data="";
         data=session.receive();
         
-        // TODO: write generator file on storage
+        if(data.startsWith(SysConst.DOMAIN_FILE)){
+            data=data.substring(4);
+            data=data.replace(SysConst.ENDL,"\n");
+            domainfile=data;
+            new File(game.getGameName()).mkdirs();
+            try {
+                FileOutputStream f = new FileOutputStream(game.getGameName()+"/domain.pddl");
+                f.write(data.getBytes());
+                f.close();
+            }catch(IOException ex){
+                System.err.println(ex.getMessage());
+            }
+            //System.out.println(data);
+        }
         
-        Solver game_solver=new Solver(session,game);
-        game_solver.executePDDL();
+        
+        // TODO: write generator file on storage
+
         
         
         
@@ -72,9 +89,9 @@ public class CreateGame {
     public List<GameType> receiveGames() {  //Through this method it's called Method Receive which in calss TCPClient and it's receive the games data that can client select it
 
         session.send(SysConst.GET_GAMES_TYPE);
-        
+         System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEe");
         String data = session.receive();
-      
+           System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEe"); 
         JSONParser parser = new JSONParser();
         try {
             Object obj = parser.parse(data);
@@ -101,10 +118,9 @@ public class CreateGame {
         return games;
     }
 
-    public void createGame() {  //Through this method it receive game that want to be created on the server by client
+    public void createGame(int index) {  //Through this method it receive game that want to be created on the server by client
             
-        
-            // TODO: get selected game from UI list
+                game=games.get(index);
         
             sendGame();
     
@@ -112,9 +128,27 @@ public class CreateGame {
 
     public void setConnection() {  //These method send the connection status between server and client to the server (the case will be sent to the server that client created game and waiting for other clients doing join to this game that have been created)
     
-        session.send(SysConst.CONNECTION_STATUS_CREATED);
+       // session.send(SysConst.CONNECTION_STATUS_CREATED);
         
     
+    }
+
+    public String getDomainfile() {
+        return domainfile;
+    }
+
+    public void setDomainfile(String domainfile) {
+        this.domainfile = domainfile;
+    }
+
+    public GameType getGame() {
+       
+        return game;
+        
+    }
+
+    public void setGame(GameType game) {
+        this.game = game;
     }
 
 }

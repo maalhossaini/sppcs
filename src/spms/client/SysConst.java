@@ -19,6 +19,11 @@ public class SysConst {
     public static final String CONNECTION_STATUS_CREATED="CSC:";
     public static final String CONNECTION_STATUS_JOIN="CSJ:";
     public static final String SEND_FINISHED_GMAE="SFG:";
-    public static final String NO_DATA="NDF";
-    public static final String CLOSE_CONNECTION="CCS";
+    public static final String START_GAME="STG:";
+    public static final String NO_DATA="NDF:";
+    public static final String CLOSE_CONNECTION="CCS:";
+     public static final String DOMAIN_FILE="SDF:";
+     public static final String ENDL="@##@";
+      public static final String BACK_TO_HOME="BAK:";
+      
 }

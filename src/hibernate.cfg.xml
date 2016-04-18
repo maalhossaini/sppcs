@@ -7,9 +7,9 @@
     <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/gamesdb?zeroDateTimeBehavior=convertToNull</property>
     <property name="hibernate.connection.username">root</property>
     <property name="hibernate.connection.password">root</property>
-    <mapping resource="spms/server/model/Connections.hbm.xml"/>
-    <mapping resource="spms/server/model/FinishGames.hbm.xml"/>
     <mapping resource="spms/server/model/ActiveGames.hbm.xml"/>
+    <mapping resource="spms/server/model/FinishGames.hbm.xml"/>
+    <mapping resource="spms/server/model/Connections.hbm.xml"/>
     <mapping resource="spms/server/model/GameType.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

@@ -1,5 +1,5 @@
 package spms.server.model;
-// Generated Feb 28, 2016 11:10:24 AM by Hibernate Tools 3.6.0
+// Generated Apr 11, 2016 12:21:00 AM by Hibernate Tools 3.6.0
 
 
 
@@ -10,14 +10,28 @@ public class FinishGames  implements java.io.Serializable {
 
 
      private FinishGamesId id;
+     private GameType gameType;
      private int score;
+     private String result;
+     private Integer sessionId;
+     private Double secondsTime;
 
     public FinishGames() {
     }
 
-    public FinishGames(FinishGamesId id, int score) {
+	
+    public FinishGames(FinishGamesId id, GameType gameType, int score) {
+        this.id = id;
+        this.gameType = gameType;
+        this.score = score;
+    }
+    public FinishGames(FinishGamesId id, GameType gameType, int score, String result, Integer sessionId, Double secondsTime) {
        this.id = id;
+       this.gameType = gameType;
        this.score = score;
+       this.result = result;
+       this.sessionId = sessionId;
+       this.secondsTime = secondsTime;
     }
    
     public FinishGamesId getId() {
@@ -27,12 +41,40 @@ public class FinishGames  implements java.io.Serializable {
     public void setId(FinishGamesId id) {
         this.id = id;
     }
+    public GameType getGameType() {
+        return this.gameType;
+    }
+    
+    public void setGameType(GameType gameType) {
+        this.gameType = gameType;
+    }
     public int getScore() {
         return this.score;
     }
     
     public void setScore(int score) {
         this.score = score;
+    }
+    public String getResult() {
+        return this.result;
+    }
+    
+    public void setResult(String result) {
+        this.result = result;
+    }
+    public Integer getSessionId() {
+        return this.sessionId;
+    }
+    
+    public void setSessionId(Integer sessionId) {
+        this.sessionId = sessionId;
+    }
+    public Double getSecondsTime() {
+        return this.secondsTime;
+    }
+    
+    public void setSecondsTime(Double secondsTime) {
+        this.secondsTime = secondsTime;
     }
 
 

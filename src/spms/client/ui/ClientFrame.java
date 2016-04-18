@@ -5,10 +5,12 @@
  */
 package spms.client.ui;
 
-
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import spms.client.ActiveGame;
+import spms.client.CreateGame;
+import spms.client.GameType;
 import spms.client.TCPClient;
 
 /**
@@ -16,47 +18,83 @@ import spms.client.TCPClient;
  * @author yazeedalmusharraf
  */
 public class ClientFrame extends javax.swing.JFrame {
+
     public static ClientFrame frame;
     public static JTabbedPane tabPanel;
     public static TCPClient tcp;
+
     public void viewConnectPanel() {
         JPanel connPanel = new ConnectPanel();
         tabPanel.removeAll();
         tabPanel.addTab("Connect To Server", connPanel);
-        
-       
+  
 
     }
-public void viewHomePanel(){  
-    
+
+    public void viewHomePanel() {
+
         JPanel homePanel = new HomePanel();
-        
+
         tabPanel.removeAll();
         tabPanel.addTab("Home", homePanel);
-        
-        
+                 JPanel result = new ResultPanel();
+        tabPanel.addTab("Result", result);
+
         //pack();
         this.setVisible(true);
-   
 
-}
-public void viewWaitingPanel(){  
-    
-        JPanel waitingPanel = new WaitingPanel();
+    }
+
+    public void viewStartPanel(GameType game) {
+
+        JPanel startPanel = new StartGamePanel(game);
+
+        tabPanel.removeAll();
+        tabPanel.addTab("Start Game", startPanel);
+                 JPanel result = new ResultPanel();
+        tabPanel.addTab("Result", result);
+
+        //pack();
+        this.setVisible(true);
+        
+
+    }
+
+    public void viewWaitingPanel(CreateGame creator) {
+
+        JPanel waitingPanel = new WaitingPanel(creator);
+        ((WaitingPanel) waitingPanel).setDomainFile(creator.getDomainfile());
         tabPanel.removeAll();
         tabPanel.addTab("Waiting", waitingPanel);
-        
+                 JPanel result = new ResultPanel();
+        tabPanel.addTab("Result", result);
+
         //pack();
         this.setVisible(true);
-   
 
-}
+    }
+
+    public void viewWaitingPanel(ActiveGame active) {
+
+        JPanel waitingPanel = new WaitingPanel(active);
+        ((WaitingPanel) waitingPanel).setDomainFile(active.getDomainfile());
+        tabPanel.removeAll();
+        tabPanel.addTab("Waiting", waitingPanel);
+                 JPanel result = new ResultPanel();
+        tabPanel.addTab("Result", result);
+
+        //pack();
+        this.setVisible(true);
+
+    }
+
     /**
      * Creates new form ClientFrame
      */
     public ClientFrame() {
 
         initComponents();
+        
         tabPanel = new javax.swing.JTabbedPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -64,21 +102,21 @@ public void viewWaitingPanel(){
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(tabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(tabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+                        .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(tabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(tabPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 340, Short.MAX_VALUE)
+                        .addContainerGap())
         );
-         viewConnectPanel();
+        viewConnectPanel();
         pack();
-       
+
     }
 
     /**
@@ -101,11 +139,11 @@ public void viewWaitingPanel(){
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGap(0, 600, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGap(0, 340, Short.MAX_VALUE)
         );
 
         pack();
@@ -113,8 +151,9 @@ public void viewWaitingPanel(){
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
-        if(tcp!=null)
-        tcp.close();
+        if (tcp != null) {
+            tcp.close();
+        }
     }//GEN-LAST:event_formWindowClosing
 
     /**
@@ -143,12 +182,13 @@ public void viewWaitingPanel(){
             java.util.logging.Logger.getLogger(ClientFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-         frame=new ClientFrame();
+        
+        frame = new ClientFrame();
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 frame.setVisible(true);
-                
+
             }
         });
     }

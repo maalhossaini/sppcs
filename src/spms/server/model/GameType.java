@@ -1,5 +1,5 @@
 package spms.server.model;
-// Generated Feb 28, 2016 11:10:24 AM by Hibernate Tools 3.6.0
+// Generated Apr 11, 2016 12:21:00 AM by Hibernate Tools 3.6.0
 
 
 import java.util.HashSet;
@@ -17,6 +17,7 @@ public class GameType  implements java.io.Serializable {
      private String domainFile;
      private String generatorCmd;
      private int gameLavel;
+     private Set finishGameses = new HashSet(0);
      private Set activeGameses = new HashSet(0);
 
     public GameType() {
@@ -29,12 +30,13 @@ public class GameType  implements java.io.Serializable {
         this.generatorCmd = generatorCmd;
         this.gameLavel = gameLavel;
     }
-    public GameType(String gameName, String gameDesc, String domainFile, String generatorCmd, int gameLavel, Set activeGameses) {
+    public GameType(String gameName, String gameDesc, String domainFile, String generatorCmd, int gameLavel, Set finishGameses, Set activeGameses) {
        this.gameName = gameName;
        this.gameDesc = gameDesc;
        this.domainFile = domainFile;
        this.generatorCmd = generatorCmd;
        this.gameLavel = gameLavel;
+       this.finishGameses = finishGameses;
        this.activeGameses = activeGameses;
     }
    
@@ -79,6 +81,13 @@ public class GameType  implements java.io.Serializable {
     
     public void setGameLavel(int gameLavel) {
         this.gameLavel = gameLavel;
+    }
+    public Set getFinishGameses() {
+        return this.finishGameses;
+    }
+    
+    public void setFinishGameses(Set finishGameses) {
+        this.finishGameses = finishGameses;
     }
     public Set getActiveGameses() {
         return this.activeGameses;

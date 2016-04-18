@@ -6,6 +6,10 @@
 
 package spms.client;
 
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,9 +32,43 @@ public class Solver {
         this.session=session;
     }
     
-    public void executePDDL(){  //Through this method will call planner and give it generatorFile that chosen by client and receive planner output to be sent to the server
-        
+    public void executePDDL(javax.swing.JTextArea t,javax.swing.JButton b) {  //Through this method will call planner and give it generatorFile that chosen by client and receive planner output to be sent to the server
+        System.out.println("STTTTTTTTTTTTTTTTTTTTTTTTT");
         //TODO: call to planner software & send the generator file to planner
+        
+        String planner_path="/home/yazeedalmusharraf/Desktop/gameProject/SPMS_Project/";
+        int randomNum = 1 + (int)(Math.random() * 1000); 
+        String path=planner_path+game.getGameName()+"/plan"+randomNum+".pddl";
+     
+        Runtime run= Runtime.getRuntime();
+        try {
+        
+       
+         // System.out.println(planner_path+"planner/FF-v2.3/./ff -o "+planner_path+game.getGameName()+"/domain.pddl -f "+planner_path+game.getGameName()+"/genfile.pddl");
+            pddlProcces=run.exec(planner_path+"planner/FF-v2.3/./ff -o "+planner_path+game.getGameName()+"/domain.pddl -f "+planner_path+game.getGameName()+"/genfile.pddl");
+            BufferedReader d= new BufferedReader(new InputStreamReader(pddlProcces.getInputStream()));
+            FileOutputStream out = new FileOutputStream(path);
+
+            
+            String line;
+            while((line=d.readLine())!=null){
+                t.append(line+"\n");
+                out.write(line.getBytes());
+                out.write("\n".getBytes());
+            }
+            out.close();
+            String f=t.getText().replace("\n", SysConst.ENDL);
+            b.setVisible(true);
+          session.send(SysConst.SEND_FINISHED_GMAE+f);
+         
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        
+        
+        
+        
         
     }
     
